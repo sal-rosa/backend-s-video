@@ -24,8 +24,8 @@ export class UserService {
     });
   }
 
-  findAll() {
-    return `This action returns all user`;
+  findAll(): Promise<User[]> {
+    return this.userModel.findAll();
   }
 
   findOne(username: string): Promise<User> {
@@ -36,11 +36,16 @@ export class UserService {
     });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<[affectedCount: number, affectedRows: User[]]> {
+    const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
+    return this.userModel.update({
+      name: updateUserDto.name,
+      username: updateUserDto.username,
+      password: hashedPassword
+    }, { where: { id }, returning: true });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  remove(id: string): Promise<Number> {
+    return this.userModel.destroy({ where: { id } });
   }
 }
